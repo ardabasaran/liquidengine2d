@@ -1,0 +1,9 @@
+universeWidth: 2000
+universeHeight: 2000
+uiWidth: 700
+uiHeight: 700
+minimumDiameter: 20
+numberOfRandomParticles: 100
+radiusOfRandomParticles: 10
+fps: 60
+updatesPerFrame: 200
