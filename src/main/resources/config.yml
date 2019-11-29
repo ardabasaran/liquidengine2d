@@ -1,9 +1,13 @@
 universeWidth: 2000
 universeHeight: 2000
+gravitationalAcceleration: 9806.65
+coefficientOfRestitution: 0.9
 uiWidth: 700
 uiHeight: 700
-minimumDiameter: 20
-numberOfRandomParticles: 100
-radiusOfRandomParticles: 10
+minimumDiameter: 30
+numberOfRandomParticles: 1000
+radiusOfRandomParticles: 15
 fps: 60
 updatesPerFrame: 200
+debug: true
+

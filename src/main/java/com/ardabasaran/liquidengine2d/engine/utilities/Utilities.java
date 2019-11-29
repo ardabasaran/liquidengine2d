@@ -2,6 +2,7 @@ package com.ardabasaran.liquidengine2d.engine.utilities;
 
 import com.ardabasaran.liquidengine2d.engine.Particle;
 import com.ardabasaran.liquidengine2d.engine.Universe;
+import java.util.List;
 import java.util.Random;
 
 public class Utilities {
@@ -50,5 +51,35 @@ public class Utilities {
 
   public static boolean sameSign(double a, double b) {
     return ((a > 0) ? 1 : -1) == ((b > 0) ? 1 : -1);
+  }
+
+  public static int leftmostParticleIndex(List<Particle> particles, int l, int r, double val) {
+    if (l == -1 && r == -1) {
+      return -1;
+    }
+    while (r-1 > l) {
+      int mid = (l + r) / 2;
+      if (particles.get(mid).getPosition().getX() < val) {
+        l = mid + 1;
+      } else {
+        r = mid;
+      }
+    }
+    return l;
+  }
+
+  public static int rightmostParticleIndex(List<Particle> particles, int l, int r, double val) {
+    if (l == -1 && r == -1) {
+      return -1;
+    }
+    while (r-1 > l) {
+      int mid = (l + r) / 2;
+      if (particles.get(mid).getPosition().getX() > val) {
+        r = mid - 1;
+      } else {
+        l = mid;
+      }
+    }
+    return r;
   }
 }

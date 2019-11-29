@@ -10,12 +10,16 @@ public class Config {
   private int updatesPerFrame;
   private int numberOfRandomParticles;
   private double radiusOfRandomParticles;
+  private double gravitationalAcceleration;
+  private double coefficientOfRestitution;
+  private boolean debug;
 
   public Config() {}
 
   public Config(int universeWidth, int universeHeight, int uiWidth, int uiHeight,
       double minimumDiameter, int fps, int updatesPerFrame, int numberOfRandomParticles,
-      double radiusOfRandomParticles) {
+      double radiusOfRandomParticles, double gravitationalAcceleration, double coefficientOfRestitution,
+      boolean debug) {
     this.universeWidth = universeWidth;
     this.universeHeight = universeHeight;
     this.uiWidth = uiWidth;
@@ -25,6 +29,9 @@ public class Config {
     this.updatesPerFrame = updatesPerFrame;
     this.numberOfRandomParticles = numberOfRandomParticles;
     this.radiusOfRandomParticles = radiusOfRandomParticles;
+    this.gravitationalAcceleration = gravitationalAcceleration;
+    this.coefficientOfRestitution = coefficientOfRestitution;
+    this.debug = debug;
   }
 
   public int getUniverseWidth() {
@@ -102,19 +109,46 @@ public class Config {
   public static Config getDefaultConfig() {
     return new Config(1000, 1000, 500, 500,
     20, 60, 200, 10,
-    10);
+    10, 9806.65, 0.9, true);
   }
 
   public String toString() {
     return "Configurations:\n" +
         "\tUniverse width: " + universeWidth + "\n" +
         "\tUniverse height: " + universeHeight + "\n" +
+        "\tGravitational acceleration: " + String.format("%.3f", gravitationalAcceleration) + "\n" +
+        "\tCoefficient of restitution: " + String.format("%.3f", coefficientOfRestitution) + "\n" +
         "\tUI width: " + uiWidth + "\n" +
         "\tUI height: " + uiHeight + "\n" +
         "\tMinimum diameter: " + String.format("%.3f", minimumDiameter) + "\n" +
         "\tFPS: " + fps + "\n" +
         "\tUpdates per frame: " + updatesPerFrame + "\n" +
         "\tNumber of random particles: " + numberOfRandomParticles + "\n" +
-        "\tRadius of random particles: " + String.format("%.3f", radiusOfRandomParticles) + "\n";
+        "\tRadius of random particles: " + String.format("%.3f", radiusOfRandomParticles) + "\n" +
+        "\tDEBUG: " + debug + "\n";
+  }
+
+  public double getGravitationalAcceleration() {
+    return gravitationalAcceleration;
+  }
+
+  public void setGravitationalAcceleration(double gravitationalAcceleration) {
+    this.gravitationalAcceleration = gravitationalAcceleration;
+  }
+
+  public double getCoefficientOfRestitution() {
+    return coefficientOfRestitution;
+  }
+
+  public void setCoefficientOfRestitution(double coefficientOfRestitution) {
+    this.coefficientOfRestitution = coefficientOfRestitution;
+  }
+
+  public boolean getDebug() {
+    return debug;
+  }
+
+  public void setDebug(boolean debug) {
+    this.debug = debug;
   }
 }

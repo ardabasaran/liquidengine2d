@@ -10,16 +10,19 @@ public class Universe implements Runnable {
   private int y;
   private List<Particle> particles;
   private List<Particle> sortedParticles;
-  private static final double GRAVITATIONAL_ACCELERATION = 9806.65;
-  private static final double COEFFICIENT_OF_RESTITUTION = 0.9;
+  private final double GRAVITATIONAL_ACCELERATION;
+  private final double COEFFICIENT_OF_RESTITUTION;
   private static final int POWER = 15;
   private static final double FORCE_MIN = 0;
+  private boolean debug;
   private double timeDelta;
   private int updateRatio;
   private int delay;
+  private int numRanges;
   private double minDiameter;
 
-  public Universe(double timeDelta, int x, int y, int updateRatio, int delay, double minDiameter) {
+  public Universe(double timeDelta, int x, int y, int updateRatio, int delay, double minDiameter,
+      double GRAVITATIONAL_ACCELERATION, double COEFFICIENT_OF_RESTITUTION, boolean debug) {
     this.timeDelta = timeDelta;
     this.x = x;
     this.y = y;
@@ -28,6 +31,10 @@ public class Universe implements Runnable {
     this.particles = new ArrayList<>();
     this.sortedParticles = new ArrayList<>();
     this.minDiameter = minDiameter;
+    this.debug = debug;
+    this.GRAVITATIONAL_ACCELERATION = GRAVITATIONAL_ACCELERATION;
+    this.COEFFICIENT_OF_RESTITUTION = COEFFICIENT_OF_RESTITUTION;
+    this.numRanges = (int) Math.ceil(this.y / minDiameter);
   }
 
   public List<Particle> getParticles() {
@@ -47,9 +54,9 @@ public class Universe implements Runnable {
     sortedParticles.add(particle);
   }
 
-  public void update() {
-    this.resolveCollisions(particles);
-    particles.forEach(Universe::applyForces);
+  private void update() {
+    this.resolveCollisions();
+    particles.forEach(this::applyGravity);
     particles.forEach(particle -> particle.update(this.timeDelta));
   }
 
@@ -61,7 +68,6 @@ public class Universe implements Runnable {
     Vector direction = particle1.getPosition().minus(particle2.getPosition());
     Vector unit1 = direction.scalarProduct(1/direction.magnitude());
     Vector unit2 = new Vector(unit1.getX(), unit1.getY());
-
 
     if (particle1.isMovingTowards(particle2)) {
       unit1.multiply(magnitude);
@@ -79,37 +85,39 @@ public class Universe implements Runnable {
     particle2.applyForce(unit2);
   }
 
-  private int findLeft(List<Particle> particles, int l, int r, double val) {
-    if (l == -1 && r == -1) {
-      return -1;
+  private void handleBorderCollision(Particle particle, double x, boolean scaleDown, Vector direction) {
+    double magnitude = FORCE_MIN + (1/timeDelta) * (1/(Utilities.pow(x, 2*POWER)));
+    Vector unit = direction.scalarProduct(1/direction.magnitude());
+
+    if (!scaleDown) {
+      particle.applyForce(unit.scalarProduct(magnitude));
+    } else {
+      particle.applyForce(unit.scalarProduct(magnitude).scalarProduct(COEFFICIENT_OF_RESTITUTION));
     }
-    while (r-1 > l) {
-      int mid = (l + r) / 2;
-      if (particles.get(mid).getPosition().getX() < val) {
-        l = mid + 1;
-      } else {
-        r = mid;
-      }
-    }
-    return l;
   }
 
-  private int findRight(List<Particle> particles, int l, int r, double val) {
-    if (l == -1 && r == -1) {
-      return -1;
+  private void resolveBorderCollisions(Particle particle) {
+    double posY = particle.getPosition().getY();
+    double posX = particle.getPosition().getX();
+    double velY = particle.getVelocity().getY();
+    double velX = particle.getVelocity().getX();
+    double radius = particle.getRadius();
+
+    if (posY - radius <= 0) {
+      handleBorderCollision(particle, posY / radius, velY >= 0, new Vector(0, 1));
     }
-    while (r-1 > l) {
-      int mid = (l + r) / 2;
-      if (particles.get(mid).getPosition().getX() > val) {
-        r = mid - 1;
-      } else {
-        l = mid;
-      }
+    if (posY + radius >= this.getY()) {
+      handleBorderCollision(particle, (this.getY() - posY)/ radius, velY <= 0, new Vector(0, -1));
     }
-    return r;
+    if (posX - radius <= 0) {
+      handleBorderCollision(particle, posX / radius, velX >= 0, new Vector(1, 0));
+    }
+    if (posX + radius >= this.getX()) {
+      handleBorderCollision(particle, (this.getX() - posX)/ radius, velX <= 0, new Vector(-1, 0));
+    }
   }
 
-  private void resolveCollisions(List<Particle> particles) {
+  private void collisionSortParticles() {
     sortedParticles.sort((a, b) -> {
       int y1 = (int) Math.floor(a.getPosition().getY()/minDiameter);
       int y2 = (int) Math.floor(b.getPosition().getY()/minDiameter);
@@ -119,10 +127,9 @@ public class Universe implements Runnable {
         return Integer.compare(y1, y2);
       }
     });
+  }
 
-
-    int numRanges = (int) Math.ceil(this.y / minDiameter);
-
+  private int[][] calculateIntervals() {
     int[][] intervals = new int[numRanges][2];
 
     int curr = 0;
@@ -141,144 +148,83 @@ public class Universe implements Runnable {
       }
       intervals[i][1] = curr - 1;
     }
+    return intervals;
+  }
+
+  private void resolveHorizontalCollisions(Particle particle, int[][] intervals,
+      int currentVertical, int particleIndex) {
+    double xRangeLow = particle.getPosition().getX() - 2*particle.getRadius();
+    double xRangeHigh = particle.getPosition().getX() + 2*particle.getRadius();
+    int j = particleIndex + 1;
+
+    while (j < sortedParticles.size() && j <= intervals[currentVertical][1] &&
+        sortedParticles.get(j).getPosition().getX() <= xRangeHigh) {
+      if (particle.isColliding(sortedParticles.get(j)))
+        handleCollision(particle, sortedParticles.get(j));
+      j += 1;
+    }
+  }
+
+  private void resolveVerticalCollisions(Particle particle, int[][] intervals,
+      int currentVertical, int numVerticals) {
+    int j = 1;
+    double xRangeLow = particle.getPosition().getX() - 2*particle.getRadius();
+    double xRangeHigh = particle.getPosition().getX() + 2*particle.getRadius();
+    while (j <= numVerticals) {
+      if (currentVertical + j < numRanges) {
+        if (intervals[currentVertical+j][0] == -1 && intervals[currentVertical+j][1] == -1) {
+          j = j + 1;
+          continue;
+        }
+        int left = Utilities.leftmostParticleIndex(
+            sortedParticles,
+            intervals[currentVertical+j][0],
+            intervals[currentVertical+j][1],
+            xRangeLow
+        );
+        int right = Utilities.rightmostParticleIndex(
+            sortedParticles,
+            intervals[currentVertical+j][0],
+            intervals[currentVertical+j][1],
+            xRangeHigh
+        );
+
+        for (int k = left; k <= right; k++) {
+          if (particle != sortedParticles.get(k) && particle.isColliding(sortedParticles.get(k)))
+            handleCollision(particle, sortedParticles.get(k));
+        }
+      }
+      j = j + 1;
+    }
+  }
+
+  private void resolveCollisions() {
+    this.collisionSortParticles();
+    int[][] intervals = calculateIntervals();
 
     for (int i = 0; i < sortedParticles.size(); i++ ) {
       Particle particle = sortedParticles.get(i);
-//      if (particle.getPosition().getX() < 0 || particle.getPosition().getX() > this.x ||
-//          particle.getPosition().getY() < 0 || particle.getPosition().getY() > this.y) {
-//        continue;
-//      }
+      resolveBorderCollisions(particle);
       int currentVertical = (int) Math.floor(particle.getPosition().getY() / minDiameter);
 
       assert intervals[currentVertical][0] != -1;
       assert intervals[currentVertical][1] != -1;
       // Horizontal
-      double xRangeLow = particle.getPosition().getX() - 2*particle.getRadius();
-      double xRangeHigh = particle.getPosition().getX() + 2*particle.getRadius();
-      int j = i + 1;
-
-      while (j < sortedParticles.size() && j <= intervals[currentVertical][1] && sortedParticles.get(j).getPosition().getX() <= xRangeHigh) {
-        if (particle.isColliding(sortedParticles.get(j)))
-          handleCollision(particle, sortedParticles.get(j));
-        j += 1;
-      }
+      resolveHorizontalCollisions(particle, intervals, currentVertical, i);
 
       // Vertical
       int numVerticals = (int) Math.ceil(2*particle.getRadius() / minDiameter);
-      if (particle.getPosition().getY() < 0 || particle.getPosition().getY() > this.y) {
-        continue;
-      }
-      j = 1;
-      while (j <= numVerticals) {
-        if (currentVertical + j < numRanges) {
-          if (intervals[currentVertical+j][0] == -1 && intervals[currentVertical+j][1] == -1) {
-            j = j + 1;
-            continue;
-          }
-          int left = findLeft(
-              sortedParticles,
-              intervals[currentVertical+j][0],
-              intervals[currentVertical+j][1],
-              xRangeLow
-          );
-
-          int right = findRight(
-              sortedParticles,
-              intervals[currentVertical+j][0],
-              intervals[currentVertical+j][1],
-              xRangeHigh
-          );
-
-
-          for (int k = left; k <= right; k++) {
-            if (particle != sortedParticles.get(k) && particle.isColliding(sortedParticles.get(k)))
-              handleCollision(particle, sortedParticles.get(k));
-          }
-        }
-
-        j = j + 1;
-      }
+//      if (particle.getPosition().getY() < 0 || particle.getPosition().getY() > this.y) {
+//        continue;
+//      }
+      resolveVerticalCollisions(particle, intervals, currentVertical, numVerticals);
     }
-
-    particles.forEach(particle -> {
-      if (particle.getPosition().getY() - particle.getRadius() <= 0) {
-        double remaining = particle.getPosition().getY();
-        double x = remaining / (particle.getRadius());
-        double magnitude = FORCE_MIN + (1/timeDelta) * (1/(Utilities.pow(x, 2*POWER)));
-        Vector direction = new Vector(0, 1);
-        Vector unit = direction.scalarProduct(1/direction.magnitude());
-
-        if (particle.getVelocity().getY() < 0) {
-          particle.applyForce(unit.scalarProduct(magnitude));
-        } else {
-          particle.applyForce(unit.scalarProduct(magnitude).scalarProduct(COEFFICIENT_OF_RESTITUTION));
-        }
-      }
-
-      if (particle.getPosition().getY() + particle.getRadius() >= this.getY()) {
-        double remaining = this.getY() - particle.getPosition().getY();
-        double x = remaining / (particle.getRadius());
-        double magnitude = FORCE_MIN + (1/timeDelta) * (1/(Utilities.pow(x, 2*POWER)));
-        Vector direction = new Vector(0, -1);
-        Vector unit = direction.scalarProduct(1/direction.magnitude());
-
-        if (particle.getVelocity().getY() > 0) {
-          particle.applyForce(unit.scalarProduct(magnitude));
-        } else {
-          particle
-              .applyForce(unit.scalarProduct(magnitude).scalarProduct(COEFFICIENT_OF_RESTITUTION));
-        }
-      }
-
-      if (particle.getPosition().getX() - particle.getRadius() <= 0) {
-        double remaining = particle.getPosition().getX();
-        double x = remaining / (particle.getRadius());
-        double magnitude = FORCE_MIN + (1/timeDelta) * (1/(Utilities.pow(x, 2*POWER)));
-        Vector direction = new Vector(1, 0);
-        Vector unit = direction.scalarProduct(1/direction.magnitude());
-
-        if (particle.getVelocity().getX() < 0) {
-          particle.applyForce(unit.scalarProduct(magnitude));
-        } else {
-          particle.applyForce(unit.scalarProduct(magnitude).scalarProduct(COEFFICIENT_OF_RESTITUTION));
-        }
-      }
-
-      if (particle.getPosition().getX() + particle.getRadius() >= this.getX()) {
-        double remaining = this.getX() - particle.getPosition().getX();
-        double x = remaining / (particle.getRadius());
-        double magnitude = FORCE_MIN + (1/timeDelta) * (1/(Utilities.pow(x, 2*POWER)));
-        Vector direction = new Vector(-1, 0);
-        Vector unit = direction.scalarProduct(1/direction.magnitude());
-
-        if (particle.getVelocity().getX() > 0) {
-          particle.applyForce(unit.scalarProduct(magnitude));
-        } else {
-          particle.applyForce(unit.scalarProduct(magnitude).scalarProduct(COEFFICIENT_OF_RESTITUTION));
-        }
-      }
-    });
   }
 
-  private static void applyForces(Particle particle) {
-    applyGravity(particle);
-    applyFriction(particle);
-    applyPressure(particle);
-  }
-
-  private static void applyGravity(Particle particle) {
+  private void applyGravity(Particle particle) {
     if (particle.getPosition().getY() - particle.getRadius() > 0) {
       particle.applyForce(new Vector(0, -particle.getMass() * GRAVITATIONAL_ACCELERATION));
     }
-    return;
-  }
-
-  private static void applyFriction(Particle particle) {
-    return;
-  }
-
-  private static void applyPressure(Particle particle) {
-    return;
   }
 
   @Override
@@ -288,7 +234,8 @@ public class Universe implements Runnable {
       for (int i = 0; i < this.updateRatio; i++)
         this.update();
       long endTime = System.nanoTime();
-      //System.out.println((endTime - startTime)/1000000 - delay + " " + (endTime - startTime)/1000000 + " " + delay);
+      if (this.debug)
+        System.out.println((endTime - startTime)/1000000 - delay + " " + (endTime - startTime)/1000000 + " " + delay);
       if ((endTime - startTime)/1000000 < delay) {
         try {
           Thread.sleep(delay - (endTime - startTime)/1000000);
