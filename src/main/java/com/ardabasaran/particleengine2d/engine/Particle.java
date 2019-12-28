@@ -1,23 +1,23 @@
-package com.ardabasaran.liquidengine2d.engine;
+package com.ardabasaran.particleengine2d.engine;
 
-import com.ardabasaran.liquidengine2d.engine.utilities.Vector;
+import com.ardabasaran.particleengine2d.utilities.Vector2D;
 
 public class Particle {
   private double radius;
   private double mass;
-  private Vector position;
-  private Vector velocity;
-  private Vector force;
+  private Vector2D position;
+  private Vector2D velocity;
+  private Vector2D force;
 
   public Particle(double radius, double mass, double x, double y) {
     this.radius = radius;
     this.mass = mass;
-    this.position = new Vector(x, y);
-    this.force = new Vector(0, 0);
-    this.velocity = new Vector(0, 0);
+    this.position = new Vector2D(x, y);
+    this.force = new Vector2D(0, 0);
+    this.velocity = new Vector2D(0, 0);
   }
 
-  public Vector getForce() {
+  public Vector2D getForce() {
     return force;
   }
 
@@ -30,7 +30,7 @@ public class Particle {
     this.force.setY(0);
   }
 
-  public void applyForce(Vector force) {
+  public void applyForce(Vector2D force) {
     this.force.add(force);
   }
 
@@ -42,15 +42,15 @@ public class Particle {
     return mass;
   }
 
-  public Vector getPosition() {
+  public Vector2D getPosition() {
     return this.position;
   }
 
-  public Vector getVelocity() {
+  public Vector2D getVelocity() {
     return this.velocity;
   }
 
-  public void setVelocity(Vector velocity) {
+  public void setVelocity(Vector2D velocity) {
     this.velocity = velocity;
   }
 

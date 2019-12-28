@@ -1,7 +1,7 @@
-package com.ardabasaran.liquidengine2d.engine.utilities;
+package com.ardabasaran.particleengine2d.utilities;
 
-import com.ardabasaran.liquidengine2d.engine.Particle;
-import com.ardabasaran.liquidengine2d.engine.Universe;
+import com.ardabasaran.particleengine2d.engine.Particle;
+import com.ardabasaran.particleengine2d.engine.Universe;
 import java.util.List;
 import java.util.Random;
 
@@ -45,7 +45,7 @@ public class Utilities {
       }
     } while(true);
 
-    particle.setVelocity(new Vector(0, 0));
+    particle.setVelocity(new Vector2D(0, 0));
     universe.addParticle(particle);
   }
 
@@ -81,5 +81,11 @@ public class Utilities {
       }
     }
     return r;
+  }
+
+  public static String getTickUpdateInfo(long startTime, long endTime, long delay) {
+    long milliSecondsPassed = (endTime - startTime) / 1000000;
+    long toSleep = delay - milliSecondsPassed;
+    return "Delay: " + delay + "\t\tMilliseconds passed: " + milliSecondsPassed + "\t\tTo sleep: " + toSleep;
   }
 }

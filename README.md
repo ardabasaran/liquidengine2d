@@ -1,2 +1,2 @@
-# liquidengine2d
-A liquid particle physics engine implemented in Java
+# particleengine2d
+A particle physics engine implemented in Java

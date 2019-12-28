@@ -1,13 +1,18 @@
-universeWidth: 2000
-universeHeight: 2000
-gravitationalAcceleration: 9806.65
-coefficientOfRestitution: 0.9
 uiWidth: 700
 uiHeight: 700
-minimumDiameter: 30
-numberOfRandomParticles: 1000
-radiusOfRandomParticles: 15
-fps: 60
-updatesPerFrame: 200
 debug: true
+numberOfRandomParticles: 500
+universeConfig:
+  ticksPerSecond: 60
+  width: 2000
+  height: 2000
+  gravitationalAcceleration: 9806.65
+  coefficientOfRestitution: 0.9
+  minimumDiameter: 30
+  updatesPerTick: 100
+  debug: true
+  detectorType: sorted
+  resolverType: exponential
+
+
 
