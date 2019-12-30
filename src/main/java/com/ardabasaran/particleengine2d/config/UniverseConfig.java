@@ -11,14 +11,16 @@ public class UniverseConfig {
   private boolean debug;
   private String detectorType;
   private String resolverType;
+  private String borderHandlerType;
   private static final String DEFAULT_DETECTOR_TYPE = "sorted";
   private static final String DEFAULT_RESOLVER_TYPE = "exponential";
+  private static final String DEFAULT_BORDER_HANDLER_TYPE = "default";
 
   public UniverseConfig() {}
 
   public UniverseConfig(int width, int height, int ticksPerSecond, double minimumDiameter,
       int updatesPerTick, double gravitationalAcceleration, double coefficientOfRestitution,
-      boolean debug, String detectorType, String resolverType) {
+      boolean debug, String detectorType, String resolverType, String borderHandlerType) {
     this.width = width;
     this.height = height;
     this.ticksPerSecond = ticksPerSecond;
@@ -29,6 +31,15 @@ public class UniverseConfig {
     this.debug = debug;
     this.detectorType = detectorType;
     this.resolverType = resolverType;
+    this.borderHandlerType = borderHandlerType;
+  }
+
+  public String getBorderHandlerType() {
+    return borderHandlerType;
+  }
+
+  public void setBorderHandlerType(String borderHandlerType) {
+    this.borderHandlerType = borderHandlerType;
   }
 
   public String getDetectorType() {
@@ -90,7 +101,7 @@ public class UniverseConfig {
   public static UniverseConfig getDefaultConfig() {
     return new UniverseConfig(2000, 2000, 60, 20, 200,
         9806.65, 0.9, true, DEFAULT_DETECTOR_TYPE,
-        DEFAULT_RESOLVER_TYPE);
+        DEFAULT_RESOLVER_TYPE, DEFAULT_BORDER_HANDLER_TYPE);
   }
 
   public String toString() {
@@ -103,7 +114,8 @@ public class UniverseConfig {
         "\t\tUpdates per frame: " + updatesPerTick + "\n" +
         "\t\tDEBUG: " + debug + "\n" +
         "\t\tDetector type: " + detectorType + "\n" +
-        "\t\tResolver type: " + resolverType + "\n";
+        "\t\tResolver type: " + resolverType + "\n" +
+        "\t\tBorder handler type: " + borderHandlerType + "\n";
   }
 
   public double getGravitationalAcceleration() {

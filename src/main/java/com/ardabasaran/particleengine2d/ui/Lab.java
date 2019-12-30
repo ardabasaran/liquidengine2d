@@ -148,10 +148,10 @@ public class Lab extends JComponent implements ActionListener {
     }
 
     Universe universe = new Universe(config.getUniverseConfig());
-    addRandomParticles(universe, config.getNumberOfRandomParticles()/2,
+    addRandomParticles(universe, 2*config.getNumberOfRandomParticles()/3,
         config.getUniverseConfig().getMinimumDiameter()/2);
 
-    for (int i = 0; i < config.getNumberOfRandomParticles()/2; i++) {
+    for (int i = 0; i < config.getNumberOfRandomParticles()/3; i++) {
       addRandomParticles(universe, 1,
           config.getUniverseConfig().getMinimumDiameter()/2 + i/10);
     }

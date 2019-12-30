@@ -64,9 +64,11 @@ public class Particle {
   }
 
   public boolean isMovingTowards(Particle other) {
-    double distNow = this.getPosition().distanceSquared(other.getPosition());
-    double distThen = this.getPosition().plus(this.getVelocity().scalarProduct(0.0001))
-        .distanceSquared(other.getPosition().plus(other.getVelocity().scalarProduct(0.0001)));
-    return distNow > distThen;
+    double velXdiff = 0.0001*(this.getVelocity().getX() - other.getVelocity().getX());
+    double velYdiff = 0.0001*(this.getVelocity().getY() - other.getVelocity().getY());
+    double posXdiff = this.getPosition().getX() - other.getPosition().getX();
+    double posYdiff = this.getPosition().getY() - other.getPosition().getY();
+
+    return velXdiff*velXdiff + velYdiff * velYdiff + 2*posXdiff*velXdiff + 2*posYdiff*velYdiff < 0;
   }
 }

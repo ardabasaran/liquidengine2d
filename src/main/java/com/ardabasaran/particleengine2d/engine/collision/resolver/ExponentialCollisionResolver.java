@@ -67,5 +67,4 @@ public class ExponentialCollisionResolver implements CollisionResolver {
     double magnitude = getMagnitude(x);
     applyForcesToCollidingParticles(firstParticle, secondParticle, magnitude);
   }
-
 }

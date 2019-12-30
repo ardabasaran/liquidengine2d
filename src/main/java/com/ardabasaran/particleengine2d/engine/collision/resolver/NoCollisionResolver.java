@@ -1,8 +1,9 @@
 package com.ardabasaran.particleengine2d.engine.collision.resolver;
 
 import com.ardabasaran.particleengine2d.engine.Particle;
-import com.ardabasaran.particleengine2d.engine.ParticlePair;
+import com.ardabasaran.particleengine2d.utilities.ParticlePair;
 import java.util.List;
+import java.util.Set;
 
 public class NoCollisionResolver implements CollisionResolver {
   @Override
@@ -11,6 +12,6 @@ public class NoCollisionResolver implements CollisionResolver {
   }
 
   @Override
-  public void resolveAllCollisions(List<ParticlePair> particlePairs) {
+  public void resolveAllCollisions(Set<ParticlePair> particlePairs) {
   }
 }

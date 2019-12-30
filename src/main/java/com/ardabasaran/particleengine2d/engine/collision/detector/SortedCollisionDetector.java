@@ -1,10 +1,12 @@
 package com.ardabasaran.particleengine2d.engine.collision.detector;
 
 import com.ardabasaran.particleengine2d.engine.Particle;
-import com.ardabasaran.particleengine2d.engine.ParticlePair;
+import com.ardabasaran.particleengine2d.utilities.ParticlePair;
 import com.ardabasaran.particleengine2d.utilities.Utilities;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class SortedCollisionDetector implements CollisionDetector {
   private int numRanges;
@@ -140,8 +142,8 @@ public class SortedCollisionDetector implements CollisionDetector {
   }
 
   @Override
-  public List<ParticlePair> detectCollisions(List<Particle> sortedParticles) {
-    List<ParticlePair> collisions = new ArrayList<>();
+  public Set<ParticlePair> detectCollisions(List<Particle> sortedParticles) {
+    Set<ParticlePair> collisions = new HashSet<>();
     this.collisionSortParticles(sortedParticles);
     int[][] intervals = calculateIntervals(sortedParticles);
 
@@ -156,9 +158,6 @@ public class SortedCollisionDetector implements CollisionDetector {
 
       // Vertical
       int numVerticals = (int) Math.ceil(2*particle.getRadius() / minDiameter);
-//      if (particle.getPosition().getY() < 0 || particle.getPosition().getY() > this.y) {
-//        continue;
-//      }
       collisions.addAll(resolveVerticalCollisions(sortedParticles, particle, intervals, currentVertical, numVerticals));
     }
 

@@ -2,12 +2,15 @@ package com.ardabasaran.particleengine2d.engine;
 
 import com.ardabasaran.particleengine2d.config.UniverseConfig;
 import com.ardabasaran.particleengine2d.engine.collision.CollisionFactory;
+import com.ardabasaran.particleengine2d.engine.collision.border.BorderCollisionHandler;
 import com.ardabasaran.particleengine2d.engine.collision.resolver.CollisionResolver;
 import com.ardabasaran.particleengine2d.engine.collision.detector.CollisionDetector;
+import com.ardabasaran.particleengine2d.utilities.ParticlePair;
 import com.ardabasaran.particleengine2d.utilities.Utilities;
 import com.ardabasaran.particleengine2d.utilities.Vector2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class Universe implements Runnable {
   private int x;
@@ -22,13 +25,14 @@ public class Universe implements Runnable {
   private int delay;
   private CollisionResolver collisionResolver;
   private CollisionDetector collisionDetector;
+  private BorderCollisionHandler borderCollisionHandler;
 
   public Universe(UniverseConfig config) {
     initFields(1.0/config.getTicksPerSecond()/config.getUpdatesPerTick(),
         config.getWidth(), config.getHeight(), config.getUpdatesPerTick(),
         1000/config.getTicksPerSecond(), config.getGravitationalAcceleration(),
         config.getCoefficientOfRestitution(), config.getDebug());
-    initCollisionResolverAndDetector(config);
+    initCollisionComponents(config);
   }
 
   private void initFields(double timeDelta, int x, int y, int numUpdatesPerTick, int delay,
@@ -45,9 +49,10 @@ public class Universe implements Runnable {
     this.COEFFICIENT_OF_RESTITUTION = COEFFICIENT_OF_RESTITUTION;
   }
 
-  private void initCollisionResolverAndDetector(UniverseConfig config) {
+  private void initCollisionComponents(UniverseConfig config) {
     this.collisionResolver = CollisionFactory.createCollisionResolver(config);
     this.collisionDetector = CollisionFactory.createCollisionDetector(config);
+    this.borderCollisionHandler = CollisionFactory.createBorderCollisionHandler(config);
   }
 
   public List<Particle> getParticles() {
@@ -69,49 +74,11 @@ public class Universe implements Runnable {
 
   private void update() {
     for (int i = 0; i < this.numUpdatesPerTick; i++) {
-      List<ParticlePair> collisions = collisionDetector.detectCollisions(sortedParticles);
+      Set<ParticlePair> collisions = collisionDetector.detectCollisions(sortedParticles);
       collisionResolver.resolveAllCollisions(collisions);
-      resolveBorderCollisions();
+      borderCollisionHandler.resolveAllCollisions(sortedParticles);
       particles.forEach(this::applyGravity);
       particles.forEach(particle -> particle.update(this.timeDelta));
-    }
-  }
-
-  private void handleBorderCollision(Particle particle, double x, boolean scaleDown, Vector2D direction) {
-    int POWER = 15;
-    double FORCE_MIN = 0;
-    double magnitude = FORCE_MIN + (1/timeDelta) * (1/(Utilities.pow(x, 2*POWER)));
-    Vector2D unit = direction.scalarProduct(1/direction.magnitude());
-
-    if (!scaleDown) {
-      particle.applyForce(unit.scalarProduct(magnitude));
-    } else {
-      particle.applyForce(unit.scalarProduct(magnitude).scalarProduct(COEFFICIENT_OF_RESTITUTION));
-    }
-  }
-
-  private void resolveBorderCollisions() {
-    for(Particle particle : this.sortedParticles) {
-      double posY = particle.getPosition().getY();
-      double posX = particle.getPosition().getX();
-      double velY = particle.getVelocity().getY();
-      double velX = particle.getVelocity().getX();
-      double radius = particle.getRadius();
-
-      if (posY - radius <= 0) {
-        handleBorderCollision(particle, posY / radius, velY >= 0, new Vector2D(0, 1));
-      }
-      if (posY + radius >= this.getY()) {
-        handleBorderCollision(particle, (this.getY() - posY) / radius, velY <= 0,
-            new Vector2D(0, -1));
-      }
-      if (posX - radius <= 0) {
-        handleBorderCollision(particle, posX / radius, velX >= 0, new Vector2D(1, 0));
-      }
-      if (posX + radius >= this.getX()) {
-        handleBorderCollision(particle, (this.getX() - posX) / radius, velX <= 0,
-            new Vector2D(-1, 0));
-      }
     }
   }
 
