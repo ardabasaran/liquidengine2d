@@ -1,19 +1,20 @@
 uiWidth: 700
 uiHeight: 700
 debug: true
-numberOfRandomParticles: 600
+numberOfRandomParticles: 100
 universeConfig:
   ticksPerSecond: 60
   width: 2000
   height: 2000
   gravitationalAcceleration: 9806.65
-  coefficientOfRestitution: 0.95
-  minimumDiameter: 50
+  coefficientOfRestitution: 0.9
+  minimumDiameter: 30
   updatesPerTick: 200
   debug: true
   detectorType: sorted
   resolverType: exponential
   borderHandlerType: exponential
+  particleGroupHandlerType: exponential
 
 
 

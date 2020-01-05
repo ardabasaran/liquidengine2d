@@ -17,11 +17,7 @@ public class Particle {
     this.velocity = new Vector2D(0, 0);
   }
 
-  public Vector2D getForce() {
-    return force;
-  }
-
-  public void update(double delta) {
+  void update(double delta) {
     force.multiply(1/mass);
     force.multiply(delta);
     this.velocity.add(force);

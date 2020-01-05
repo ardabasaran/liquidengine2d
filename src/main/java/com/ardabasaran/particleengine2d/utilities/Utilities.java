@@ -23,13 +23,13 @@ public class Utilities {
     return res;
   }
 
-  public static void addRandomParticle(Universe universe, double radius) {
+  public static Particle addRandomParticle(Universe universe, double radius) {
     Random gen = new Random();
     Particle particle;
     do {
       double x = gen.nextDouble()*universe.getX();
       double y = gen.nextDouble()*universe.getY();
-      particle = new Particle(radius, 5.0, x, y);
+      particle = new Particle(radius, radius, x, y);
       boolean cond = true;
       for(Particle p : universe.getParticles()) {
         if(p.isColliding(particle)) {
@@ -47,10 +47,7 @@ public class Utilities {
 
     particle.setVelocity(new Vector2D(0, 0));
     universe.addParticle(particle);
-  }
-
-  public static boolean sameSign(double a, double b) {
-    return ((a > 0) ? 1 : -1) == ((b > 0) ? 1 : -1);
+    return particle;
   }
 
   public static int leftmostParticleIndex(List<Particle> particles, int l, int r, double val) {
@@ -87,5 +84,14 @@ public class Utilities {
     long milliSecondsPassed = (endTime - startTime) / 1000000;
     long toSleep = delay - milliSecondsPassed;
     return "Delay: " + delay + "\t\tMilliseconds passed: " + milliSecondsPassed + "\t\tTo sleep: " + toSleep;
+  }
+
+  public static Particle findParticle(Vector2D position, List<Particle> particles) {
+    for (Particle particle: particles) {
+      if (particle.getPosition().distanceSquared(position) < particle.getRadius()*particle.getRadius()) {
+        return particle;
+      }
+    }
+    return null;
   }
 }
