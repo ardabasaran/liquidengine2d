@@ -8,18 +8,18 @@ import java.util.Set;
 
 public class PairwiseCollisionDetector implements CollisionDetector {
 
-  @Override
-  public Set<ParticlePair> detectCollisions(List<Particle> particleList) {
-    Set<ParticlePair> collisions = new HashSet<>();
-    for (int i = 0; i < particleList.size(); i++) {
-      Particle particle = particleList.get(i);
-      for (int j = i + 1; j < particleList.size(); j++) {
-        Particle otherParticle = particleList.get(j);
-        if (particle.isColliding(otherParticle)) {
-          collisions.add(new ParticlePair(particle, otherParticle));
+    @Override
+    public Set<ParticlePair> detectCollisions(List<Particle> particleList) {
+        Set<ParticlePair> collisions = new HashSet<>();
+        for (int i = 0; i < particleList.size(); i++) {
+            Particle particle = particleList.get(i);
+            for (int j = i + 1; j < particleList.size(); j++) {
+                Particle otherParticle = particleList.get(j);
+                if (particle.isColliding(otherParticle)) {
+                    collisions.add(new ParticlePair(particle, otherParticle));
+                }
+            }
         }
-      }
+        return collisions;
     }
-    return collisions;
-  }
 }

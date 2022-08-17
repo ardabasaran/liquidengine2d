@@ -8,25 +8,25 @@ import java.util.List;
 import java.util.Set;
 
 public class ParticleGroup {
-  private Set<Particle> particles;
-  private List<ParticlePair> particlePairs;
+    private Set<Particle> particles;
+    private List<ParticlePair> particlePairs;
 
-  public ParticleGroup() {
-    particlePairs = new ArrayList<>();
-    particles = new HashSet<>();
-  }
+    public ParticleGroup() {
+        particlePairs = new ArrayList<>();
+        particles = new HashSet<>();
+    }
 
-  List<ParticlePair> getParticlePairs() {
-    return particlePairs;
-  }
+    List<ParticlePair> getParticlePairs() {
+        return particlePairs;
+    }
 
-  public void addPair(ParticlePair pair) {
-    particlePairs.add(pair);
-    particles.add(pair.getFirst());
-    particles.add(pair.getSecond());
-  }
+    public void addPair(ParticlePair pair) {
+        particlePairs.add(pair);
+        particles.add(pair.getFirst());
+        particles.add(pair.getSecond());
+    }
 
-  public Set<Particle> getParticles() {
-    return particles;
-  }
+    public Set<Particle> getParticles() {
+        return particles;
+    }
 }

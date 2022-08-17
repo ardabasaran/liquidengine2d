@@ -1,7 +1,7 @@
 uiWidth: 700
 uiHeight: 700
 debug: true
-numberOfRandomParticles: 100
+numberOfRandomParticles: 500
 universeConfig:
   ticksPerSecond: 60
   width: 2000
@@ -11,8 +11,8 @@ universeConfig:
   minimumDiameter: 30
   updatesPerTick: 200
   debug: true
-  detectorType: sorted
-  resolverType: exponential
+  detectorType: SORTED
+  resolverType: EXPONENTIAL
   borderHandlerType: exponential
   particleGroupHandlerType: exponential
 

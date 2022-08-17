@@ -8,8 +8,8 @@ import java.util.Set;
 
 public class NoCollisionDetector implements CollisionDetector {
 
-  @Override
-  public Set<ParticlePair> detectCollisions(List<Particle> particleList) {
-    return new HashSet<>();
-  }
+    @Override
+    public Set<ParticlePair> detectCollisions(List<Particle> particleList) {
+        return new HashSet<>();
+    }
 }
