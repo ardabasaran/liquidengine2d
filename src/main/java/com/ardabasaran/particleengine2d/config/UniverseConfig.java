@@ -17,7 +17,8 @@ public class UniverseConfig {
     private String borderHandlerType;
     private String particleGroupHandlerType;
     private static final CollisionDetectorType DEFAULT_DETECTOR_TYPE = CollisionDetectorType.SORTED;
-    private static final CollisionResolverType DEFAULT_RESOLVER_TYPE = CollisionResolverType.EXPONENTIAL;
+    private static final CollisionResolverType DEFAULT_RESOLVER_TYPE =
+            CollisionResolverType.EXPONENTIAL;
     private static final String DEFAULT_PARTICLE_GROUP_HANDLER_TYPE = "exponential";
     private static final String DEFAULT_BORDER_HANDLER_TYPE = "default";
 

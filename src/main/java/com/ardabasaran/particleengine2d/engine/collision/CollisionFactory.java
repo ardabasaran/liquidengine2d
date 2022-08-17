@@ -32,7 +32,8 @@ public class CollisionFactory {
         return switch (type) {
             case NO_COLLISION -> new NoCollisionResolver();
             case ELASTIC -> new ElasticCollisionResolver(config.getCoefficientOfRestitution());
-            case EXPONENTIAL -> new ExponentialCollisionResolver(timeDelta, config.getCoefficientOfRestitution());
+            case EXPONENTIAL -> new ExponentialCollisionResolver(
+                    timeDelta, config.getCoefficientOfRestitution());
         };
     }
 
